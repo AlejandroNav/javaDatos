@@ -7,42 +7,49 @@ public class SimuladorBaseDeDatos {
 
     // Clase interna para representar un atributo (columna) de la tabla
     static class Atributo {
+        // definimos los atributos de la clase Atributo
         String nombreAtributo;
         String tipoDato;
         boolean esLlavePrimaria;
 
-        // Constructor del atributo
+        // Constructor del atributo(asignamos los valores)
         Atributo(String nombreAtributo, String tipoDato, boolean esLlavePrimaria) {
+            // this hace referencia a el objeto que creamos cuando metetmos los datos
+            // clase es un molde o plantilla, un objeto seria Alumno o Profesor
             this.nombreAtributo = nombreAtributo;
             this.tipoDato = tipoDato;
             this.esLlavePrimaria = esLlavePrimaria;
         }
 
         // Método para representar el atributo como texto, mostrando si es PK
-        public String toString() {
-            String pk = esLlavePrimaria ? " (PK)" : "";
+        public String toString() { // esto e ssolo para mostrar el atributo creado
+            String pk = ""; // y si tiene llave primaria o nop
+            if (esLlavePrimaria) {
+                pk = " (Primary Key)";
+            }
             return nombreAtributo + " (" + tipoDato + ")" + pk;
         }
     }
 
     // Clase interna para representar la tabla
-    static class Tabla {
-        String nombreTabla;
-        List<Atributo> listaAtributos = new ArrayList<>();
-        List<Map<String, String>> registros = new ArrayList<>();
+    static class Tabla { 
+        String nombreTabla; // Nombre de la tabla es  un string
+        List<Atributo> listaAtributos = new ArrayList<>(); // Guardamos los atributos o columnas de la tabla
+        List<Map<String, String>> registros = new ArrayList<>(); // Lista de registros (filas) de la tabla
 
-        Tabla(String nombreTabla) {
+        Tabla(String nombreTabla) { // Constructor de la tabla
             this.nombreTabla = nombreTabla;
         }
 
-        // Método para agregar atributos a la tabla
+        // Método para agregar atributos(columnas) a la tabla
         public void agregarAtributo(String nombre, String tipo, boolean esPK) {
             listaAtributos.add(new Atributo(nombre, tipo, esPK));
         }
 
-        // Método para insertar un registro (fila) en la tabla
+        // Método para insertar un registro (fila o alumno en el ejemplo) en la tabla
         public void insertarRegistro() {
             Map<String, String> nuevoRegistro = new HashMap<>();
+            // la unica manera de 
             System.out.println("Insertando nuevo registro en la tabla: " + nombreTabla);
 
             for (Atributo atributo : listaAtributos) {
