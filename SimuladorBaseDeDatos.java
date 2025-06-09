@@ -49,7 +49,7 @@ public class SimuladorBaseDeDatos {
         // Método para insertar un registro (fila o alumno en el ejemplo) en la tabla
         public void insertarRegistro() {
             Map<String, String> nuevoRegistro = new HashMap<>();
-            // la unica manera de 
+
             System.out.println("Insertando nuevo registro en la tabla: " + nombreTabla);
 
             for (Atributo atributo : listaAtributos) {
@@ -60,7 +60,7 @@ public class SimuladorBaseDeDatos {
                     System.out.print("Ingresa " + atributo.nombreAtributo + " (" + atributo.tipoDato + "): ");
                     valor = entrada.nextLine();
 
-                    // Validación de tipo int
+                    // Validación de tipo int si el atributo es de tipo entero continua si no es correcto te lo vuelve a pedir
                     if (atributo.tipoDato.equals("int")) {
                         try {
                             Integer.parseInt(valor);
@@ -69,7 +69,7 @@ public class SimuladorBaseDeDatos {
                             System.out.println(" ERROR Valor inválido. Debe ser un número entero.");
                         }
                     }
-                    // Validación de tipo float
+                    // Validación de tipo float si no es flaot te lo vuelve a pedir
                     else if (atributo.tipoDato.equals("float")) {
                         try {
                             Float.parseFloat(valor);
@@ -84,17 +84,17 @@ public class SimuladorBaseDeDatos {
                     }
                 }
 
-                nuevoRegistro.put(atributo.nombreAtributo, valor);
+                nuevoRegistro.put(atributo.nombreAtributo, valor); // después de validar el tipo de dato se agrega al registro
             }
 
-            registros.add(nuevoRegistro);
+            registros.add(nuevoRegistro); // metemos el neuvo registro validado a la lsita de regristros
             System.out.println("  Registro agregado correctamente.\n");
         }
 
         // Método para mostrar todos los registros guardados
         public void mostrarRegistros() {
             System.out.println(" Registros de la tabla: " + nombreTabla);
-            if (registros.isEmpty()) {
+            if (registros.isEmpty()) { // si no hay registros te lo dice
                 System.out.println("No hay registros aún.");
                 return;
             }
@@ -121,7 +121,7 @@ public class SimuladorBaseDeDatos {
 
         while (true) {
             // Menú de opciones del simulador
-            System.out.println("\n======+++ MENU PRINCIPAL +++======\n");
+            System.out.println("\n ======+++ MENU PRINCIPAL +++====== \n");
             System.out.println("1. Crear nueva tabla");
             System.out.println("2. Insertar un registro");
             System.out.println("3. Ver registros");
