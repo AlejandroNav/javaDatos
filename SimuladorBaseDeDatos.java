@@ -120,7 +120,7 @@ public class SimuladorBaseDeDatos {
         Tabla tablaActual = null;
 
         while (true) {
-            // Menú de opciones
+            // Menú de opciones del simulador
             System.out.println("\n======+++ MENU PRINCIPAL +++======\n");
             System.out.println("1. Crear nueva tabla");
             System.out.println("2. Insertar un registro");
