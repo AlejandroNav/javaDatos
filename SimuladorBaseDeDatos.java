@@ -5,6 +5,9 @@ public class SimuladorBaseDeDatos {
     // Scanner global para entrada de usuario
     static Scanner entrada = new Scanner(System.in);
 
+/* === CAMBIO 1: mapa para guardar TODAS las tablas === */
+static Map<String, Tabla> tablas = new LinkedHashMap<>();
+
     // Clase interna para representar un atributo (columna) de la tabla
     static class Atributo {
         // definimos los atributos de la clase Atributo
@@ -130,88 +133,69 @@ public class SimuladorBaseDeDatos {
             System.out.print("Selecciona una opción: ");
             String opcion = entrada.nextLine();
 
-            switch (opcion) {
-                case "1":
-                    // Crear tabla
-                    System.out.print("🆕 Ingresa el nombre de la nueva tabla: ");
+     switch (opcion) {
+                case "1":  // Crear tabla
+                    System.out.print(" Ingresa el nombre de la nueva tabla: ");
                     String nombreTabla = entrada.nextLine();
-                    tablaActual = new Tabla(nombreTabla);
 
+                    /* === CAMBIO 2: evitar duplicados === */
+                    if (tablas.containsKey(nombreTabla)) {
+                        System.out.println(" ERROR Ya existe una tabla con ese nombre.");
+                        break;
+                    }
+
+                    tablaActual = new Tabla(nombreTabla);
+                    tablas.put(nombreTabla, tablaActual);      // <-- guarda en el mapa
+
+                    // (todo lo demás queda exactamente igual)
                     System.out.print("¿Cuántos atributos tendrá la tabla? ");
                     int cantidadAtributos = Integer.parseInt(entrada.nextLine());
-
                     List<String> nombresTemp = new ArrayList<>();
-
-                    // Recolección de nombres de atributos
                     for (int i = 0; i < cantidadAtributos; i++) {
                         System.out.print("Nombre del atributo #" + (i + 1) + ": ");
                         nombresTemp.add(entrada.nextLine());
                     }
-
-                    // Asignación de tipo a cada atributo
                     for (String nombre : nombresTemp) {
                         String tipoDato;
                         while (true) {
                             System.out.print("Tipo de dato para '" + nombre + "' (int, char, float): ");
                             tipoDato = entrada.nextLine().toLowerCase();
-                            if (tipoDato.equals("int") || tipoDato.equals("char") || tipoDato.equals("float")) break;
+                            if (tipoDato.equals("int")||tipoDato.equals("char")||tipoDato.equals("float")) break;
                             System.out.println(" ERROR Tipo inválido.");
                         }
                         tablaActual.agregarAtributo(nombre, tipoDato, false);
                     }
-
-                    // Selección obligatoria de llave primaria
                     while (true) {
                         System.out.println("\nSelecciona el nombre del atributo que será la llave primaria (PK):");
-                        for (Atributo a : tablaActual.listaAtributos) {
-                            System.out.println("- " + a.nombreAtributo);
-                        }
-
+                        for (Atributo a : tablaActual.listaAtributos) System.out.println("- " + a.nombreAtributo);
                         System.out.print("Escribe el nombre exacto del atributo PK: ");
                         String elegido = entrada.nextLine();
-
                         boolean encontrado = false;
                         for (Atributo a : tablaActual.listaAtributos) {
-                            if (a.nombreAtributo.equals(elegido)) {
-                                a.esLlavePrimaria = true;
-                                encontrado = true;
-                                break;
-                            }
+                            if (a.nombreAtributo.equals(elegido)) { a.esLlavePrimaria = true; encontrado = true; break; }
                         }
-
-                        if (encontrado) {
-                            System.out.println(" # Atributo marcado como llave primaria.");
-                            break;
-                        } else {
-                            System.out.println(" ERROR Atributo no encontrado. Intenta de nuevo.");
-                        }
+                        if (encontrado) { System.out.println(" # Atributo marcado como llave primaria."); break; }
+                        else System.out.println(" ERROR Atributo no encontrado. Intenta de nuevo.");
                     }
-
                     System.out.println(" # Tabla creada correctamente.");
                     break;
 
-                case "2":
-                    if (tablaActual == null) {
-                        System.out.println(" ERROR Primero debes crear una tabla.");
-                    } else {
-                        tablaActual.insertarRegistro();
-                    }
+                case "2":  // Insertar registro
+                    if (tablas.isEmpty()) { System.out.println(" ERROR No hay tablas creadas."); break; }
+                    tablaActual = seleccionarTabla();
+                    if (tablaActual != null) tablaActual.insertarRegistro();
                     break;
 
-                case "3":
-                    if (tablaActual == null) {
-                        System.out.println(" ERROR No hay ninguna tabla creada.");
-                    } else {
-                        tablaActual.mostrarRegistros();
-                    }
+                case "3":  // Ver registros
+                    if (tablas.isEmpty()) { System.out.println(" ERROR No hay tablas creadas."); break; }
+                    tablaActual = seleccionarTabla();
+                    if (tablaActual != null) tablaActual.mostrarRegistros();
                     break;
 
-                case "4":
-                    if (tablaActual == null) {
-                        System.out.println(" ERROR No hay ninguna tabla creada.");
-                    } else {
-                        System.out.println(tablaActual);
-                    }
+                case "4":  // Ver estructura
+                    if (tablas.isEmpty()) { System.out.println(" ERROR No hay tablas creadas."); break; }
+                    tablaActual = seleccionarTabla();
+                    if (tablaActual != null) System.out.println(tablaActual);
                     break;
 
                 case "0":
@@ -222,5 +206,16 @@ public class SimuladorBaseDeDatos {
                     System.out.println(" ERROR Opción no válida.");
             }
         }
+    }
+
+    /* === CAMBIO 3: función auxiliar para elegir tabla destino === */
+    private static Tabla seleccionarTabla() {
+        System.out.println(" Tablas disponibles:");
+        tablas.keySet().forEach(t -> System.out.println(" • " + t));
+        System.out.print("¿Con cuál tabla trabajar?: ");
+        String nombre = entrada.nextLine();
+        Tabla t = tablas.get(nombre);
+        if (t == null) System.out.println(" ERROR Tabla no encontrada.");
+        return t;
     }
 }
