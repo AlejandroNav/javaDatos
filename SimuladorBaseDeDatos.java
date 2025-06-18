@@ -22,13 +22,6 @@ public class SimuladorBaseDeDatos {
         String[][] datos = {
                 { "20230001", "Ana Ruiz", "19", "A1", "S" },
                 { "20230002", "Luis García", "20", "A1", "N" },
-                { "20230003", "María López", "21", "B2", "S" },
-                { "20230004", "Carlos Pérez", "18", "B2", "N" },
-                { "20230005", "Elena Gómez", "22", "C3", "N" },
-                { "20230006", "Jorge Santos", "20", "C3", "S" },
-                { "20230007", "Paola Hernández", "19", "D1", "S" },
-                { "20230008", "Ricardo Díaz", "21", "D1", "N" },
-                { "20230009", "Sofía Morales", "18", "E2", "S" },
                 { "20230010", "Tomás Vargas", "22", "E2", "N" }
         };
         for (String[] fila : datos) {
@@ -50,7 +43,6 @@ public class SimuladorBaseDeDatos {
         String[][] datosCursos = {
                 { "101", "Matemáticas I", "6" },
                 { "102", "Programación", "8" },
-                { "103", "Historia", "4" },
                 { "104", "Física", "7" }
         };
         for (String[] fila : datosCursos) {
@@ -61,6 +53,25 @@ public class SimuladorBaseDeDatos {
             c.registros.add(reg);
         }
         tablas.put(c.nombreTabla, c); // <<--- segunda tabla
+              /* --------- salones --------- */
+        Tabla s = new Tabla("salones");
+        s.agregarAtributo("salon",     "char", true);   // PK
+        s.agregarAtributo("edificio",  "char", false);
+        s.agregarAtributo("capacidad", "int",  false);
+
+        String[][] datosSalones = {
+            {"A1", "Edif. A", "35"},
+            {"D1", "Edif. D", "25"},
+            {"E2", "Edif. E", "32"}
+        };
+        for (String[] f : datosSalones) {
+            Map<String,String> r = new LinkedHashMap<>();
+            r.put("salon",     f[0]);
+            r.put("edificio",  f[1]);
+            r.put("capacidad", f[2]);
+            s.registros.add(r);
+        }
+        tablas.put(s.nombreTabla, s);
     }
 
     // ----- Clases internas -----
@@ -69,10 +80,10 @@ public class SimuladorBaseDeDatos {
         String tipoDato;
         boolean esLlavePrimaria;
 
-        Atributo(String nombreAtributo, String tipoDato, boolean esPK) {
-            this.nombreAtributo = nombreAtributo;
-            this.tipoDato = tipoDato;
-            this.esLlavePrimaria = esPK;
+        Atributo(String n, String t, boolean pk) {
+            nombreAtributo = n;
+            tipoDato = t;
+            esLlavePrimaria = pk;
         }
 
         public String toString() {
@@ -85,8 +96,8 @@ public class SimuladorBaseDeDatos {
         List<Atributo> listaAtributos = new ArrayList<>();
         List<Map<String, String>> registros = new ArrayList<>();
 
-        Tabla(String nombre) {
-            nombreTabla = nombre;
+        Tabla(String n) {
+            nombreTabla = n;
         }
 
         void agregarAtributo(String n, String t, boolean pk) {
@@ -106,14 +117,14 @@ public class SimuladorBaseDeDatos {
                             Integer.parseInt(val);
                             break;
                         } catch (NumberFormatException e) {
-                            System.err.println("Valor inválido. Debe ser entero.");
+                            System.err.println("Debe ser entero.");
                         }
                     } else if (at.tipoDato.equals("float")) {
                         try {
                             Float.parseFloat(val);
                             break;
                         } catch (NumberFormatException e) {
-                            System.err.println("Valor inválido. Debe ser decimal.");
+                            System.err.println("Debe ser decimal.");
                         }
                     } else
                         break; // char
@@ -151,11 +162,12 @@ public class SimuladorBaseDeDatos {
             System.out.println("4. Ver estructura de la tabla");
             System.out.println("5. Proyección de columnas");
             System.out.println("6. Selección de filas");
+            System.out.println("7. Producto cartesiano");
             System.out.println("0. Salir");
             System.out.print("Opción: ");
-            String opcion = entrada.nextLine().trim();
+            String op = entrada.nextLine().trim();
 
-            switch (opcion) {
+            switch (op) {
                 case "1":
                     crearTabla();
                     break;
@@ -173,6 +185,9 @@ public class SimuladorBaseDeDatos {
                     break;
                 case "6":
                     operarTabla(SimuladorBaseDeDatos::seleccionarFilas);
+                    break;
+                case "7":
+                    productoCartesiano();
                     break;
                 case "0":
                     System.out.println("¡Hasta luego!");
@@ -406,4 +421,47 @@ public class SimuladorBaseDeDatos {
         }
         return false;
     }
+
+    // ---------- Producto cartesiano ----------
+    private static void productoCartesiano() {
+        if (tablas.size() < 2) {
+            System.err.println("Se necesitan al menos dos tablas.");
+            return;
+        }
+        System.out.println("== Selecciona primera tabla ==");
+        Tabla t1 = seleccionarTabla();
+        if (t1 == null)
+            return;
+
+        System.out.println("== Selecciona segunda tabla ==");
+        Tabla t2 = seleccionarTabla();
+        if (t2 == null)
+            return;
+
+        if (t1.registros.isEmpty() || t2.registros.isEmpty()) {
+            System.out.println("(una de las tablas no tiene registros)");
+            return;
+        }
+
+        // Encabezados con prefijo tabla.
+        List<String> headers = new ArrayList<>();
+        t1.listaAtributos.forEach(a -> headers.add(t1.nombreTabla + "." + a.nombreAtributo));
+        t2.listaAtributos.forEach(a -> headers.add(t2.nombreTabla + "." + a.nombreAtributo));
+
+        System.out.println("== Producto cartesiano ==");
+        headers.forEach(h -> System.out.print(h + "\t"));
+        System.out.println();
+
+        for (Map<String, String> r1 : t1.registros) {
+            for (Map<String, String> r2 : t2.registros) {
+                // Imprimir fila combinada
+                for (Atributo a : t1.listaAtributos)
+                    System.out.print(r1.get(a.nombreAtributo) + "\t");
+                for (Atributo a : t2.listaAtributos)
+                    System.out.print(r2.get(a.nombreAtributo) + "\t");
+                System.out.println();
+            }
+        }
+    }
+
 }
